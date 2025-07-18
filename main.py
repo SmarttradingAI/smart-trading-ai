@@ -24,3 +24,6 @@ def chat():
         reply = "I'm still learning. Ask me about Bitcoin, forex, or stocks!"
 
     return jsonify({"reply": reply})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
