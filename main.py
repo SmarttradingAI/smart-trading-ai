@@ -1,21 +1,26 @@
-from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
-import os
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
-CORS(app)
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
 @app.route("/api", methods=["POST"])
-def api():
+def chat():
     data = request.get_json()
     user_message = data.get("message", "")
-    reply = f"You said: {user_message}"
-    return jsonify({"reply": reply})
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    # --- FAKE AI LOGIC ---
+    if "bitcoin" in user_message.lower():
+        reply = "Bitcoin is a decentralized digital currency."
+    elif "forex" in user_message.lower():
+        reply = "Forex stands for the foreign exchange market."
+    elif "stock" in user_message.lower():
+        reply = "Stocks represent ownership in a company."
+    elif "hello" in user_message.lower() or "how are you" in user_message.lower():
+        reply = "Hi there! How can I help you with trading today?"
+    else:
+        reply = "I'm still learning. Ask me about Bitcoin, forex, or stocks!"
+
+    return jsonify({"reply": reply})
