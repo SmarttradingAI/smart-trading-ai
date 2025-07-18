@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartTradingAI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    #chat-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      padding: 20px;
+      height: 70vh;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 6px;
+    }
+
+    .user {
+      background-color: #d0f0fd;
+      text-align: right;
+    }
+
+    .ai {
+      background-color: #e9e9e9;
+      text-align: left;
+    }
+
+    #input-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      padding: 0 20px;
+    }
+
+    #message-input {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #send-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-left: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #send-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container"></div>
+
+  <div id="input-container">
+    <input type="text" id="message-input" placeholder="Ask me anything..." />
+    <button id="send-btn">Send</button>
+  </div>
+
+  <script>
+    const chatContainer = document.getElementById('chat-container');
+    const input = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function appendMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', sender);
+      messageDiv.textContent = text;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      appendMessage(userMessage, 'user');
+      input.value = '';
+
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage })
+        });
+
+        const data = await response.json();
+        appendMessage(data.reply, 'ai');
+      } catch (error) {
+        appendMessage("Error connecting to server.", 'ai');
+      }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
