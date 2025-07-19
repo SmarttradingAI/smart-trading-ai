@@ -1,6 +1,18 @@
-from openai import OpenAI
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
+from dotenv import load_dotenv
+import openai
+import os
 
-client = OpenAI(api_key=openai_api_key)
+load_dotenv()
+app = Flask(__name__)
+CORS(app)
+
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -11,12 +23,14 @@ def chat():
         return jsonify({'response': "❌ Please type a message."})
 
     try:
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": user_message}]
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # You can change this to gpt-4 if allowed
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_message}
+            ]
         )
-        ai_reply = completion.choices[0].message.content
-        return jsonify({'response': ai_reply})
-
+        reply = response.choices[0].message.content.strip()
+        return jsonify({'reply': reply})
     except Exception as e:
-        return jsonify({'response': f"❌ Error: {str(e)}"})
+        return jsonify({'reply': f"❌ Error: {str(e)}"})
