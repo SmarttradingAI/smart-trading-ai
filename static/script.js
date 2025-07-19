@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       const data = await response.json();
-      appendMessage("AI", data.response);  // ✅ Fixed key here
+      appendMessage("AI", data.reply);  // ✅ Fixed key here
     } catch (error) {
       appendMessage("Error", "Error connecting to server.");
     }
