@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.querySelector("form");
-  const input = document.querySelector("input[name='message']");
-  const chat = document.querySelector("#chat");
+  const input = document.querySelector("input");
+  const chat = document.getElementById("chat");
 
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const response = await fetch("/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message: userMessage })
       });
 
       const data = await response.json();
-      appendMessage("AI", data.reply);
+      appendMessage("AI", data.response);  // ✅ Fixed key here
     } catch (error) {
       appendMessage("Error", "Error connecting to server.");
     }
