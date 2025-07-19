@@ -1,29 +1,37 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import openai
+import os
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-@app.route("/api", methods=["POST"])
+@app.route('/chat', methods=['POST'])
 def chat():
-    data = request.get_json()
-    user_message = data.get("message", "")
+    data = request.json
+    user_message = data.get('message', '')
+    
+    if not user_message:
+        return jsonify({'response': '❌ Please type a message.'})
+    
+    try:
+        # Call GPT API with dynamic prompt
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are SmartTradingAI. Detect the user's language and always reply in the same language. If the user asks about trading (buy/sell/hold), give meaningful but safe suggestions like 'This is not financial advice, but here’s what I suggest…'. If it's a general question, just answer helpfully."},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        ai_reply = response.choices[0].message.content.strip()
+        return jsonify({'response': ai_reply})
+    
+    except Exception as e:
+        return jsonify({'response': f'❌ Error: {str(e)}'})
 
-    # --- FAKE AI LOGIC ---
-    if "bitcoin" in user_message.lower():
-        reply = "Bitcoin is a decentralized digital currency."
-    elif "forex" in user_message.lower():
-        reply = "Forex stands for the foreign exchange market."
-    elif "stock" in user_message.lower():
-        reply = "Stocks represent ownership in a company."
-    elif "hello" in user_message.lower() or "how are you" in user_message.lower():
-        reply = "Hi there! How can I help you with trading today?"
-    else:
-        reply = "I'm still learning. Ask me about Bitcoin, forex, or stocks!"
-
-    return jsonify({"reply": reply})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+# Render compatibility
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
